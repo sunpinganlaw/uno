@@ -1401,6 +1401,7 @@ namespace Uno.UI {
 			const element = this.getView(viewId) as HTMLElement;
 
 			const elementStyle = element.style;
+			const elementClasses = element.className;
 			const originalStyleCssText = elementStyle.cssText;
 			let parentElement: HTMLElement = null;
 			let parentElementWidthHeight: { width: string, height: string } = null;
@@ -1479,8 +1480,8 @@ namespace Uno.UI {
 					const imgElement = element as HTMLImageElement;
 					return [imgElement.naturalWidth, imgElement.naturalHeight];
 				}
-				else if (element instanceof HTMLInputElement) {
-					const inputElement = element as HTMLInputElement;
+				else if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+					const inputElement = element;
 
 					cleanupUnconnectedRoot(this.containerElement);
 
@@ -1488,6 +1489,7 @@ namespace Uno.UI {
 					var textOnlyElement = document.createElement("p") as HTMLParagraphElement;
 					textOnlyElement.style.cssText = updatedStyleString;
 					textOnlyElement.innerText = inputElement.value;
+					textOnlyElement.className = elementClasses;
 
 					unconnectedRoot = textOnlyElement;
 					this.containerElement.appendChild(unconnectedRoot);
@@ -1495,8 +1497,18 @@ namespace Uno.UI {
 					var textSize = this.measureElement(textOnlyElement);
 					var inputSize = this.measureElement(element);
 
-					// Take the width of the inner text, but keep the height of the input element.
-					return [textSize[0], inputSize[1]];
+					// Take the width of the inner text. For HTMLInputs, keep the height of the input element as they are always one line.
+					// For HTMLTextArea, take the height of the ParagraphElement.
+					const width = Math.min(textSize[0], maxWidth);
+					var height;
+					if (element instanceof HTMLTextAreaElement) {
+						height = Math.max(textSize[1] + 1, inputSize[1]);
+					}
+					else {
+						height = inputSize[1];
+					}
+					height = Math.min(height, maxHeight);
+					return [width, height];
 				}
 				else {
 					return this.measureElement(element);
