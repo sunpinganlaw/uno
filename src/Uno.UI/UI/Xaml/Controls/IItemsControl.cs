@@ -7,8 +7,6 @@ namespace Windows.UI.Xaml.Controls
 		DataTemplate ItemTemplate { get; set; }
 
 		DataTemplateSelector ItemTemplateSelector { get; set; }
-
-		string DisplayMemberPath { get; set; }
 	}
 }
 
